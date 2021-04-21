@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  orion-context-broker-ld:
+  - apiVersion: v2
+    appVersion: 0.7-PRE-125
+    created: "2021-04-21T19:02:08.892529403Z"
+    description: A Helm chart for Orion Context Broker (Linked Data Exetensions)
+    digest: 748a4d0745f09544d8985c423f127f0838ea69324c9e7ffec6224cf2fe5466da
+    name: orion-context-broker-ld
+    type: application
+    urls:
+    - https://github.com/FeSaRoTi/charts/releases/download/orion-context-broker-ld-0.1.0/orion-context-broker-ld-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-04-21T19:02:08.892534303Z"
