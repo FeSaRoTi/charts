@@ -1,0 +1,190 @@
+{{- if not .Values.existingDBSecret -}}
+{{- fail "You must provide a mongo db secret" -}}
+{{- end -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "orion-context-broker-ld.fullname" . }}
+  labels:
+    {{- include "orion-context-broker-ld.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "orion-context-broker-ld.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "orion-context-broker-ld.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "orion-context-broker-ld.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: ORIONLD_PORT
+              value: {{ .Values.port | quote }}
+            - name: ORIONLD_MONGO_HOST
+              value: {{ .Values.dbHost | quote }}
+            - name: ORIONLD_MONGO_REPLICA_SET
+              value: {{ .Values.rplSet }}
+            - name: ORIONLD_MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingDBSecret | quote }}
+                  value: "username"
+            - name: ORIONLD_MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingDBSecret | quote }}
+                  value: "password"
+            - name: ORIONLD_MONGO_DB
+              value: {{ .Values.dbName | quote }}
+            - name: ORIONLD_MONGO_TIMEOUT
+              value: {{ .Value.dbTimeout | quote }}
+            - name: ORIONLD_MONGO_POOL_SIZE
+              value: {{ .Values.dbPoolSize | quote }}
+            - name: ORIONLD_MONGO_WRITE_CONCERN
+              value: {{ .Values.writeConcern | quote }}
+            - name: ORIONLD_MONGO_ID_INDEX
+              value: {{ .Values.idIndex | quote | upper }}
+            - name: ORIONLD_USEIPV4
+              value: {{ .Values.useOnlyIPv4 | quote | upper }}
+            - name: ORIONLD_USEIPV6
+              value: {{ .Values.useOnlyIPv6 | quote | upper }}
+            - name: ORIONLD_HARAKIRI
+              value: {{ .Values.harakiri | quote | upper }}
+            - name: ORIONLD_HTTPS
+              value: {{ .Values.https | quote | upper }}
+            - name: ORIONLD_HTTPS_KEYFILE
+              value: {{ .Values.httpsKeyFile | quote }}
+            - name: ORIONLD_HTTPS_CERTFILE
+              value: {{ .Values.httpsCertFile | quote }}
+            - name: ORIONLD_RUSH
+              value: {{ .Values.rush | quote }}
+            - name: ORIONLD_MULTI_SERVICE
+              value: {{ .Values.multitenancy | quote | upper }}
+            - name: ORIONLD_HTTP_TIMEOUT
+              value: {{ .Values.httpTimeout | quote }}
+            - name: ORIONLD_REQ_TIMEOUT
+              value: {{ .Values.reqTimeout | quote }}
+            - name: ORIONLD_MUTEX_POLICY
+              value: {{ .Values.reqMutexPolicy | quote }}
+            - name: ORIONLD_CORS_ALLOWED_ORIGIN
+              value: {{ .Values.allowedOrigin | quote }}
+            - name: ORIONLD_CORS_MAX_AGE
+              value: {{ .Values.maxAge | quote }}
+            - name: ORIONLD_CPR_FORWARD_LIMIT
+              value: {{ .Values.cprForwardLimit | quote }}
+            - name: ORIONLD_SUBCACHE_IVAL
+              value: {{ .Values.subCacheInterval | quote }}
+            - name: ORIONLD_NOCACHE
+              value: {{ .Values.noCache | quote | upper }}
+            - name: ORIONLD_CONN_MEMORY
+              value: {{ .Values.connectionMemory | quote }}
+            - name: ORIONLD_MAX_CONN
+              value: {{ .Values.maxConnections | quote }}
+            - name: ORIONLD_TRQ_POOL_SIZE
+              value: {{ .Values.reqPoolSize | quote }}
+            - name: ORIONLD_NOTIF_MODE
+              value: {{ .Values.notificationMode | quote }}
+            - name: ORIONLD_DROP_NOTIF
+              value: {{ .Values.simulatedNotification | quote | upper }}
+            - name: ORIONLD_STAT_COUNTERS
+              value: {{ .Values.statCounters | quote | upper }}
+            - name: ORIONLD_STAT_SEM_WAIT
+              value: {{ .Values.statSemWait | quote | upper }}
+            - name: ORIONLD_STAT_TIMING
+              value: {{ .Values.statTiming | quote | upper }}
+            - name: ORIONLD_STAT_NOTIF_QUEUE
+              value: {{ .Values.statNotifQueue | quote | upper }}
+            - name: ORIONLD_LOG_SUMMARY_PERIOD
+              value: {{ .Values.lsPeriod | quote }}
+            - name: ORIONLD_RELOG_ALARMS
+              value: {{ .Values.relogAlarms | quote | upper }}
+            - name: ORIONLD_CHECK_ID_V1
+              value: {{ .Values.strictIdv1 | quote | upper }}
+            - name: ORIONLD_DISABLE_CUSTOM_NOTIF
+              value: {{ .Values.disableCusNotif | quote | upper }}
+            - name: ORIONLD_LOG_FOR_HUMANS
+              value: {{ .Values.logForHumans | quote | upper }}
+            - name: ORIONLD_DISABLE_FILE_LOG
+              value: {{ .Values.disableFileLog | quote | upper }}
+            - name: ORIONLD_DISABLE_METRICS
+              value: {{ .Values.disableMetrics | quote | upper }}
+            - name: ORIONLD_INSECURE_NOTIF
+              value: {{ .Values.insecureNotif | quote | upper }}
+            - name: ORIONLD_NGSIV1_AUTOCAST
+              value: {{ .Values.ngsiv1Autocast | quote | upper }}
+            - name: ORIONLD_CONTEXT_DOWNLOAD_TIMEOUT
+              value: {{ .Values.contextDownloadTimeout | quote }}
+            - name: ORIONLD_CONTEXT_DOWNLOAD_ATTEMPTS
+              value: {{ .Values.contextDownloadAttempts | quote }}
+            - name: ORIONLD_TROE
+              value: {{ .Values.troe | quote | upper }}
+            - name: ORIONLD_TMP_TRACES
+              value: {{ .Values.lmtmp | quote | upper }}
+            - name: ORIONLD_SOCKET_SERVICE
+              value: {{ .Values.socketService | quote | upper }}
+            - name: ORIONLD_TROE_HOST
+              value: {{ .Values.troeHost | quote }}
+            - name: ORIONLD_TROE_PORT
+              value: {{ .Values.troePort | quote }}
+            - name: ORIONLD_TROE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingTRoESecret | quote }}
+                  value: "username"
+            - name: ORIONLD_TROE_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingTRoESecret | quote }}
+                  value: "password"
+            - name: ORIONLD_TROE_POOL_SIZE
+              value: {{ .Values.troePoolSize | quote }}
+            - name: ORIONLD_SOCKET_SERVICE_PORT
+              value: {{ .Values.socketServicePort | quote }}
+            - name: ORIONLD_FORWARDING
+              value: {{ .Values.forwarding | quote | upper }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /version
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

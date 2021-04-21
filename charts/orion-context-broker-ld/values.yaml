@@ -1,0 +1,189 @@
+# Default values for orion-context-broker-ld.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+# Secret name for the mongo db
+existingDBSecret: orion-ld-mongo-secret
+# Secret name for the TRoE db
+existingTRoESecret: orion-ld-troe-secret
+# database host
+dbHost: localhost
+# port to receive new connections
+port: 1026
+# replica set
+rplSet: 
+# database name
+dbName: orion
+# timeout in milliseconds for connections to the replica set (ignored in the case of not using replica set)
+dbTimeout: 10000
+# database connection pool size
+dbPoolSize: 10
+# db write concern (0:unacknowledged, 1:acknowledged)
+writeConcern: 1
+# automatic mongo index on _id.id
+idIndex: false
+# use ip v4 only
+useOnlyIPv4: false
+# use ip v6 only
+useOnlyIPv6: false
+# commits harakiri on request
+harakiri: false
+# use the https 'protocol'
+https: false
+# private server key file (for https)
+httpsKeyFile:
+# certificate key file (for https)
+httpsCertFile:
+# rush host (IP:port)
+rush:
+# service multi tenancy mode
+multitenancy: false
+# timeout in milliseconds for forwards and notifications
+httpTimeout: -1
+# connection timeout for REST requests (in seconds)
+reqTimeout: 0
+# mutex policy (none/read/write/all)
+reqMutexPolicy: none
+# nable Cross-Origin Resource Sharing with allowed origin. Use '__ALL' for any
+allowedOrigin:
+# maximum time in seconds preflight requests are allowed to be cached. Default: 86400
+maxAge: 86400
+# maximum number of forwarded requests to Context Providers for a single client request
+cprForwardLimit: 1000
+# interval in seconds between calls to Subscription Cache refresh (0: no refresh)
+subCacheInterval: 0
+# disable subscription cache for lookups
+noCache: false
+# maximum memory size per connection (in kilobytes)
+connectionMemory: 64
+# maximum number of simultaneous connections
+maxConnections: 1020
+# size of thread pool for incoming connections
+reqPoolSize: 0
+# notification mode (persistent|transient|threadpool:q:n)
+notificationMode: transient
+# simulate notifications instead of actual sending them (only for testing)
+simulatedNotification: false
+# enable request/notification counters statistics
+statCounters: false
+# enable semaphore waiting time statistics
+statSemWait: false
+# enable request-time-measuring statistics
+statTiming: false
+# enable thread pool notifications queue statistics
+statNotifQueue: false
+# log summary period in seconds (defaults to 0, meaning 'off')
+lsPeriod: 0
+# log messages for existing alarms beyond the raising alarm log message itself
+relogAlarms: false
+# additional checks for id fields in the NGSIv1 API
+strictIdv1: false
+# disable NGSIv2 custom notifications
+disableCusNotif: false
+# uman readible log to screen
+logForHumans: false
+# disable logging into file
+disableFileLog: true
+# turn off the 'metrics' feature
+disableMetrics: false
+# allow HTTPS notifications to peers which certificate cannot be authenticated with known CA certificates
+insecureNotif: false
+# automatic cast for number, booleans and dates in NGSIv1 update/create attribute operations
+ngsiv1Autocast: false
+# Timeout in milliseconds for downloading of contexts
+contextDownloadTimeout: 5000
+# Number of attempts for downloading of contexts
+contextDownloadAttempts:3
+# enable TRoE - temporal representation of entities
+troe: false
+# disable LM_TMP traces
+lmtmp: true
+# enable the socket service - accept connections via a normal TCP socket
+socketService: false
+# host for troe database db server
+troeHost: localhost
+# port for troe database db server
+troePort: 5432
+# username for troe database db server
+troeUser: postgres
+# password for troe database db server
+troePwd: password
+# size of the connection pool for TRoE Postgres database connections
+troePoolSize: 10
+# port to receive new socket service connections
+socketServicePort: 1027
+# turn on forwarding
+forwarding: false
+
+image:
+  repository: fiware/orion-ld
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true: a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: orion-ld.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources: such as Minikube. If you do want to specify resources: uncomment the following
+  # lines: adjust them as necessary: and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
