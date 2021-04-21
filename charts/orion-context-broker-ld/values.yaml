@@ -94,7 +94,7 @@ ngsiv1Autocast: false
 # Timeout in milliseconds for downloading of contexts
 contextDownloadTimeout: 5000
 # Number of attempts for downloading of contexts
-contextDownloadAttempts:3
+contextDownloadAttempts: 3
 # enable TRoE - temporal representation of entities
 troe: false
 # disable LM_TMP traces
